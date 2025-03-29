@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
 func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, req *http.Request) {
 	dbchirps, err := cfg.db.GetChirps(req.Context())
 	if err != nil {
-		fmt.Printf("database error: %v", err)
+		log.Printf("database error: %v", err)
 		respondWithError(w, http.StatusInternalServerError, "Internal server error")
 	}
 	resp := make([]Chirp, len(dbchirps))

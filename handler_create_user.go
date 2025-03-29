@@ -2,14 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/jather/chirpy/internal/auth"
+	"github.com/jather/chirpy/internal/database"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, req *http.Request) {
 	type parameters struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	decoder := json.NewDecoder(req.Body)
@@ -26,7 +30,16 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, req *http.Request
 		respondWithError(w, http.StatusBadRequest, "Email field cannot be empty")
 		return
 	}
-	dbUser, err := cfg.db.CreateUser(req.Context(), email)
+	password, err := auth.HashPassword(param.Password)
+	if err != nil {
+		log.Printf("error while hashing password, %s", err)
+		if err == bcrypt.ErrPasswordTooLong {
+			respondWithError(w, 400, "password too long")
+		} else {
+			respondWithError(w, 400, "password invalid")
+		}
+	}
+	dbUser, err := cfg.db.CreateUser(req.Context(), database.CreateUserParams{Email: email, HashedPassword: password})
 	if err != nil {
 		log.Printf("error during database operation")
 		respondWithError(w, http.StatusBadRequest, "Internal server error")
@@ -38,12 +51,5 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, req *http.Request
 		UpdatedAt: dbUser.UpdatedAt,
 		Email:     dbUser.Email,
 	}
-
-	data, err := json.Marshal(user)
-	if err != nil {
-		fmt.Printf("database error: %v", err)
-		respondWithError(w, http.StatusInternalServerError, "Internal server error")
-		return
-	}
-	respondWithJson(w, 201, data)
+	respondWithJson(w, 201, user)
 }

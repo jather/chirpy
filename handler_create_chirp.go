@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -50,11 +49,5 @@ func (cfg *apiConfig) handlerCreateChirp(w http.ResponseWriter, req *http.Reques
 		respondWithError(w, http.StatusInternalServerError, "Internal server error")
 	}
 	resp := Chirp{ID: chirp.ID, CreatedAt: chirp.CreatedAt, UpdatedAt: chirp.UpdatedAt, Body: chirp.Body, UserID: chirp.UserID}
-	//encode response body
-	data, err := json.Marshal(resp)
-	if err != nil {
-		fmt.Printf("error while marshalling json: %v", err)
-		respondWithError(w, http.StatusInternalServerError, "Internal server error")
-	}
-	respondWithJson(w, http.StatusCreated, data)
+	respondWithJson(w, http.StatusCreated, resp)
 }

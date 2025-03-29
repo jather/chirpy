@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -12,7 +12,7 @@ func (cfg *apiConfig) handlerResetUsers(w http.ResponseWriter, req *http.Request
 	}
 	err := cfg.db.ResetUsers(req.Context())
 	if err != nil {
-		fmt.Printf("database error: %v", err)
+		log.Printf("database error: %v", err)
 		respondWithError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
