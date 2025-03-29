@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -16,19 +17,19 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, req *http.Request
 	err := decoder.Decode(&param)
 	if err != nil {
 		log.Printf("error while decoding json")
-		http.Error(w, "Failed to create user", http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Incorrect input")
 		return
 	}
 	email := param.Email
 	if email == "" {
 		log.Printf("Email field empty")
-		http.Error(w, "Email field is empty", http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Email field cannot be empty")
 		return
 	}
 	dbUser, err := cfg.db.CreateUser(req.Context(), email)
 	if err != nil {
 		log.Printf("error during database operation")
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		respondWithError(w, http.StatusBadRequest, "Internal server error")
 		return
 	}
 	user := User{
@@ -40,10 +41,9 @@ func (cfg *apiConfig) handlerCreateUser(w http.ResponseWriter, req *http.Request
 
 	data, err := json.Marshal(user)
 	if err != nil {
-		log.Printf("error during database operation")
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		fmt.Printf("database error: %v", err)
+		respondWithError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
-	w.WriteHeader(201)
-	w.Write(data)
+	respondWithJson(w, 201, data)
 }

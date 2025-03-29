@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -33,29 +34,27 @@ func (cfg *apiConfig) handlerCreateChirp(w http.ResponseWriter, req *http.Reques
 	err := decoder.Decode(&params)
 	if err != nil {
 		log.Printf("Error decoding parameters, %v", err)
-		w.WriteHeader(500)
-		w.Write([]byte(`{"error":"something went wrong"}`))
+		respondWithError(w, 500, "Internal server error")
 		return
 	}
 	//Check length of chirp
 	if len(params.Body) > 140 {
 		log.Print("chirp too long")
-		http.Error(w, "chirp too long", http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Chirp cannot be more than 140 characters")
 	} else {
 		params.Body = cleanText(params.Body)
 	}
 	chirp, err := cfg.db.CreateChirp(req.Context(), database.CreateChirpParams{Body: params.Body, UserID: params.UserID})
 	if err != nil {
 		log.Printf("database error, %v", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		respondWithError(w, http.StatusInternalServerError, "Internal server error")
 	}
 	resp := Chirp{ID: chirp.ID, CreatedAt: chirp.CreatedAt, UpdatedAt: chirp.UpdatedAt, Body: chirp.Body, UserID: chirp.UserID}
 	//encode response body
 	data, err := json.Marshal(resp)
 	if err != nil {
-		w.WriteHeader(400)
-		w.Write([]byte(`{"error":"something went wrong"}`))
+		fmt.Printf("error while marshalling json: %v", err)
+		respondWithError(w, http.StatusInternalServerError, "Internal server error")
 	}
-	w.WriteHeader(201)
-	w.Write(data)
+	respondWithJson(w, http.StatusCreated, data)
 }
