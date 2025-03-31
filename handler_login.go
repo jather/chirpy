@@ -31,5 +31,4 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, req *http.Request) {
 	}
 	resp := User{Id: user.ID, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt, Email: user.Email}
 	respondWithJson(w, http.StatusOK, resp)
-
 }
