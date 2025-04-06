@@ -6,10 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync/atomic"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/jather/chirpy/internal/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -17,27 +14,6 @@ import (
 
 const port = "8080"
 const rootfilepath = "."
-
-type apiConfig struct {
-	fileserverHits atomic.Int32
-	db             *database.Queries
-	platform       string
-}
-
-type User struct {
-	Id        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-}
-
-type Chirp struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Body      string    `json:"body"`
-	UserID    uuid.UUID `json:"user_id"`
-}
 
 func main() {
 	godotenv.Load()
@@ -48,7 +24,7 @@ func main() {
 	}
 	dbQueries := database.New(db)
 
-	cfg := apiConfig{db: dbQueries, platform: os.Getenv("PLATFORM")}
+	cfg := apiConfig{db: dbQueries, platform: os.Getenv("PLATFORM"), jwtsecret: os.Getenv("SECRET")}
 	serveMux := http.NewServeMux()
 
 	serveMux.Handle("/app/", http.StripPrefix("/app", cfg.middlewareMetricsInc(http.FileServer(http.Dir(rootfilepath)))))
@@ -59,6 +35,8 @@ func main() {
 	serveMux.HandleFunc("POST /api/chirps", cfg.handlerCreateChirp)
 	serveMux.HandleFunc("POST /api/users", cfg.handlerCreateUser)
 	serveMux.HandleFunc("POST /api/login", cfg.handlerLogin)
+	serveMux.HandleFunc("POST /api/refresh", cfg.handlerRefresh)
+	serveMux.HandleFunc("POST /api/revoke", cfg.handlerRevoke)
 	serveMux.HandleFunc("POST /admin/reset", cfg.handlerResetUsers)
 
 	server := http.Server{
