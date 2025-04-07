@@ -24,7 +24,7 @@ func main() {
 	}
 	dbQueries := database.New(db)
 
-	cfg := apiConfig{db: dbQueries, platform: os.Getenv("PLATFORM"), jwtsecret: os.Getenv("SECRET")}
+	cfg := apiConfig{db: dbQueries, platform: os.Getenv("PLATFORM"), jwtsecret: os.Getenv("SECRET"), polkaKey: os.Getenv("POLKA_KEY")}
 	serveMux := http.NewServeMux()
 
 	serveMux.Handle("/app/", http.StripPrefix("/app", cfg.middlewareMetricsInc(http.FileServer(http.Dir(rootfilepath)))))
