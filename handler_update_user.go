@@ -43,7 +43,7 @@ func (cfg *apiConfig) handlerUpdateUser(w http.ResponseWriter, req *http.Request
 		respondWithError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
-	resp := User{Id: updatedUser.ID, CreatedAt: updatedUser.CreatedAt, UpdatedAt: updatedUser.UpdatedAt, Email: updatedUser.Email}
+	resp := User{Id: updatedUser.ID, CreatedAt: updatedUser.CreatedAt, UpdatedAt: updatedUser.UpdatedAt, Email: updatedUser.Email, IsChirpyRed: updatedUser.IsChirpyRed.Bool}
 	respondWithJson(w, http.StatusOK, resp)
 
 }

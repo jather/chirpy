@@ -20,6 +20,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, req *http.Request) {
 		Id           uuid.UUID `json:"id"`
 		CreatedAt    time.Time `json:"created_at"`
 		UpdatedAt    time.Time `json:"updated_at"`
+		IsChirpyRed  bool      `json:"is_chirpy_red"`
 		Email        string    `json:"email"`
 		Token        string    `json:"token"`
 		RefreshToken string    `json:"refresh_token"`
@@ -59,6 +60,6 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, req *http.Request) {
 		log.Printf("database error, %v", err)
 		respondWithError(w, http.StatusInternalServerError, "internal server error")
 	}
-	resp := loginResp{Id: user.ID, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt, Email: user.Email, Token: token, RefreshToken: refreshToken}
+	resp := loginResp{Id: user.ID, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt, IsChirpyRed: user.IsChirpyRed.Bool, Email: user.Email, Token: token, RefreshToken: refreshToken}
 	respondWithJson(w, http.StatusOK, resp)
 }

@@ -30,6 +30,7 @@ func main() {
 	serveMux.Handle("/app/", http.StripPrefix("/app", cfg.middlewareMetricsInc(http.FileServer(http.Dir(rootfilepath)))))
 	serveMux.HandleFunc("GET /api/healthz", handlerHealthz)
 	serveMux.HandleFunc("GET /admin/metrics", cfg.showMetrics)
+
 	serveMux.HandleFunc("GET /api/chirps", cfg.handlerGetChirps)
 	serveMux.HandleFunc("GET /api/chirps/{chirp_ID}", cfg.handlerGetChirp)
 	serveMux.HandleFunc("POST /api/chirps", cfg.handlerCreateChirp)
@@ -43,6 +44,8 @@ func main() {
 	serveMux.HandleFunc("POST /admin/reset", cfg.handlerResetUsers)
 
 	serveMux.HandleFunc("DELETE /api/chirps/{chirp_ID}", cfg.handlerDeleteChirp)
+
+	serveMux.HandleFunc("POST /api/polka/webhooks", cfg.handlerPolkaWebhook)
 
 	server := http.Server{
 		Addr:    ":" + port,
