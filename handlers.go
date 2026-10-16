@@ -14,12 +14,12 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 	})
 }
 func (cfg *apiConfig) showMetrics(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte(fmt.Sprintf(`<html>
+	w.Write(fmt.Appendf(nil, `<html>
   <body>
     <h1>Welcome, Chirpy Admin</h1>
     <p>Chirpy has been visited %d times!</p>
   </body>
-</html>`, cfg.fileserverHits.Load())))
+</html>`, cfg.fileserverHits.Load()))
 	w.Header().Add("Content-Type", "text/html")
 
 }
